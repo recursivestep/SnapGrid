@@ -133,8 +133,11 @@
 	self.cellText = nil;
 }
 
-- (void)updatedCellSlotContents:(NSArray *)slotContents
+#pragma mark UIDraggableFlowLayoutProtocol
+
+- (void)flowLayout:(RSDraggableFlowLayout *)flowLayout updatedCellSlotContents:(NSArray *)slotContents;
 {
+	[flowLayout indexOfAccessibilityElement:nil];
 	NSMutableArray *newOrder = [NSMutableArray array];
 	for (int i = 0; i < slotContents.count; i++) {
 		int indexOfOldSlot = [[slotContents objectAtIndex:i] intValue];
@@ -142,6 +145,35 @@
 		[newOrder addObject:[NSNumber numberWithInt:newSlotIndex]];
 	}
 	self.cellOrder = newOrder;
+}
+
+- (BOOL)flowLayout:(RSDraggableFlowLayout *)flowLayout canMoveItemAtIndex:(int)index
+{
+	if (index == self.numberOfCells - 1) {
+		return NO;
+	}
+	return YES;
+}
+
+#pragma mark UICollectionViewDelegate
+
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
+{
+	UIViewController *vc = [[UIViewController alloc] init];
+	UICollectionViewCell *cell = [self.collectionView cellForItemAtIndexPath:indexPath];
+	vc.view.backgroundColor = cell.backgroundColor;
+	[self.view addSubview:vc.view];
+
+	CGRect rect = CGRectMake(CGRectGetMidX(cell.frame), CGRectGetMidY(cell.frame), 0, 0);
+	vc.view.frame = rect;
+	
+	[UIView animateWithDuration:0.3 delay:0.0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+				vc.view.frame = self.view.frame;
+			}
+			completion:^(BOOL finished) {
+				[vc.view removeFromSuperview];
+				[self.navigationController pushViewController:vc animated:NO];
+			}];
 }
 
 /*

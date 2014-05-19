@@ -146,7 +146,12 @@
 {
 	[self populateCellOrigins];
 
-	self.selectedPath = [[self.collectionView indexPathForItemAtPoint:p] row];
+	NSIndexPath *pathForObjectAtPoint = [self.collectionView indexPathForItemAtPoint:p];
+	if (![self.delegate flowLayout:self canMoveItemAtIndex:pathForObjectAtPoint.row]) {
+		return;
+	}
+
+	self.selectedPath = pathForObjectAtPoint.row;
 	self.currentPath = self.selectedPath;
 	self.dragAnimator = [[UIDynamicAnimator alloc] initWithCollectionViewLayout:self];
 
@@ -196,6 +201,10 @@
 	int fromSlotIndex = self.currentPath;
 
 	if (NSNotFound == toSlotIndex) {
+		return;
+	}
+
+	if (![self.delegate flowLayout:self canMoveItemAtIndex:toSlotIndex]) {
 		return;
 	}
 
@@ -298,7 +307,7 @@
 
 - (void)stopDragging:(CGPoint)p
 {
-	[self.delegate updatedCellSlotContents:self.currentSlotContents];
+	[self.delegate flowLayout:self updatedCellSlotContents:self.currentSlotContents];
 	[self.collectionView reloadData];
 
 	[self removeSnapBehaviors];
