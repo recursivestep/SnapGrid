@@ -6,6 +6,10 @@
 //  Copyright (c) 2014 Recustive Step. All rights reserved.
 //
 
+//
+// Basic collection view controller to test RSDraggableFlowLayout
+//
+
 #import <UIKit/UIKit.h>
 #import "RSDraggableFlowLayout.h"
 

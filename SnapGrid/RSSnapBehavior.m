@@ -14,7 +14,6 @@
 {
 	self = [super initWithItem:item snapToPoint:point];
 	if (self) {
-		self.item = item;
 		self.snapPoint = point;
 	}
 	return self;

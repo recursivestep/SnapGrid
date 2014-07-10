@@ -8,8 +8,14 @@
 
 #import <UIKit/UIKit.h>
 
+//
+// Custom snap behavior because it doesn't seem possible to
+// query the snap point of the base type.
+//
+
 @interface RSSnapBehavior : UISnapBehavior
+
 - (instancetype)initWithItem:(id <UIDynamicItem>)item snapToPoint:(CGPoint)point;
-@property(nonatomic, assign) id<UIDynamicItem> item;
 @property(nonatomic, assign) CGPoint snapPoint;
+
 @end

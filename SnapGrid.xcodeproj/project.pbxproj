@@ -90,6 +90,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9791371B196F0097003520E0 /* DraggableFlowLayout */ = {
+			isa = PBXGroup;
+			children = (
+				B9F8BAAE18F5631A00F068AB /* RSDraggableFlowLayout.h */,
+				B9F8BAAF18F5631A00F068AB /* RSDraggableFlowLayout.m */,
+				B973953C19129477002FD174 /* RSSnapBehavior.h */,
+				B973953D19129477002FD174 /* RSSnapBehavior.m */,
+			);
+			name = DraggableFlowLayout;
+			sourceTree = "<group>";
+		};
 		B9F8BA6718F557FE00F068AB = {
 			isa = PBXGroup;
 			children = (
@@ -123,18 +134,15 @@
 		B9F8BA7918F557FE00F068AB /* SnapGrid */ = {
 			isa = PBXGroup;
 			children = (
-				B9F8BA8218F557FE00F068AB /* RSAppDelegate.h */,
-				B9F8BA8318F557FE00F068AB /* RSAppDelegate.m */,
+				9791371B196F0097003520E0 /* DraggableFlowLayout */,
 				B9F8BA8518F557FE00F068AB /* Main_iPhone.storyboard */,
 				B9F8BA8818F557FE00F068AB /* Main_iPad.storyboard */,
+				B9F8BA8218F557FE00F068AB /* RSAppDelegate.h */,
+				B9F8BA8318F557FE00F068AB /* RSAppDelegate.m */,
 				B9F8BA8B18F557FE00F068AB /* RSViewController.h */,
 				B9F8BA8C18F557FE00F068AB /* RSViewController.m */,
 				B9F8BAAB18F55C8400F068AB /* RSTestCollectionViewController.h */,
 				B9F8BAAC18F55C8400F068AB /* RSTestCollectionViewController.m */,
-				B9F8BAAE18F5631A00F068AB /* RSDraggableFlowLayout.h */,
-				B9F8BAAF18F5631A00F068AB /* RSDraggableFlowLayout.m */,
-				B973953C19129477002FD174 /* RSSnapBehavior.h */,
-				B973953D19129477002FD174 /* RSSnapBehavior.m */,
 				B9F8BA8E18F557FE00F068AB /* Images.xcassets */,
 				B9F8BA7A18F557FE00F068AB /* Supporting Files */,
 			);

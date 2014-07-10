@@ -6,10 +6,20 @@
 //  Copyright (c) 2014 Recustive Step. All rights reserved.
 //
 
+
+
+//
+// Basic collection view controller to test RSDraggableFlowLayout
+//
+
+
+
 #import "RSTestCollectionViewController.h"
 
-@interface RSTestCollectionViewController ()
 
+
+// Private properties - they form a simple model for the order, colour and text of each cell.
+@interface RSTestCollectionViewController ()
 @property(nonatomic, strong) NSMutableArray *cellOrder;
 @property(nonatomic, strong) NSMutableArray *cellColors;
 @property(nonatomic, strong) NSMutableArray *cellText;
@@ -66,12 +76,7 @@
 	}
 }
 
-- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
-{
-	[super willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
-	[self.collectionViewLayout invalidateLayout];
-}
-
+// Currently only supports single section
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
 	return self.numberOfCells;
@@ -91,15 +96,17 @@
 	
 	UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
 
+	// Cells can be reused so explicitly set all attribute of the one we've been given
+	// and don't assume that we need to create all subviews
 	int mappedRow = [[self.cellOrder objectAtIndex:indexPath.row] intValue];
-	if (!cell.contentView.subviews.count) {
+	if (!cell.contentView.subviews.count) {	// New cell object
 		UILabel *label = [[UILabel alloc] initWithFrame:cell.bounds];
 		label.text = [self.cellText objectAtIndex:mappedRow];
 		label.textColor = [UIColor whiteColor];
 		label.textAlignment = NSTextAlignmentCenter;
 		[cell.contentView addSubview:label];
 		cell.backgroundColor = [self.cellColors objectAtIndex:mappedRow];
-	} else {
+	} else {	// Previously used cell object
 		UILabel *label = cell.contentView.subviews.firstObject;
 		label.text = [self.cellText objectAtIndex:mappedRow];
 		label.textColor = [UIColor whiteColor];
@@ -159,6 +166,9 @@
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
+	// If a cell is selected then navigate to new view controller with custom animation.
+	// Set colour of new view to colour of cell that has been selected.
+
 	UIViewController *vc = [[UIViewController alloc] init];
 	UICollectionViewCell *cell = [self.collectionView cellForItemAtIndexPath:indexPath];
 	vc.view.backgroundColor = cell.backgroundColor;
@@ -168,23 +178,11 @@
 	vc.view.frame = rect;
 	
 	[UIView animateWithDuration:0.3 delay:0.0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-				vc.view.frame = self.view.frame;
-			}
-			completion:^(BOOL finished) {
-				[vc.view removeFromSuperview];
-				[self.navigationController pushViewController:vc animated:NO];
-			}];
+			vc.view.frame = self.view.frame;
+		} completion:^(BOOL finished) {
+			[vc.view removeFromSuperview];
+			[self.navigationController pushViewController:vc animated:NO];
+		}];
 }
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
-{
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 
 @end
