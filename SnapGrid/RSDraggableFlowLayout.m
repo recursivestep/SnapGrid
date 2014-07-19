@@ -13,7 +13,6 @@
 // Private properties
 @interface RSDraggableFlowLayout ()
 
-@property(nonatomic, strong) UILongPressGestureRecognizer *dragGestureRecognizer;	// To detect drag action
 @property(nonatomic, strong) UIAttachmentBehavior *attachmentBehavior;				// Pins dragging cell to touch position
 @property(nonatomic, strong) UIDynamicAnimator *dragAnimator;						// Animator for attachment behavior
 @property(nonatomic, strong) NSMutableDictionary *snapAnimators;					// Animators for snapping cells
@@ -28,7 +27,7 @@
 
 @implementation RSDraggableFlowLayout
 
-- (id)init
+- (instancetype)init
 {
 	self = [super init];
 	if (self) {
@@ -48,40 +47,24 @@
 
 - (void)commonInit
 {
+	self.selectedPath = NSNotFound;
+	self.currentPath = NSNotFound;
 }
 
-- (void)prepareLayout
-{
-	[super prepareLayout];
-
-	// Need to initialise the gesture recogniser somewhere but can't do in init functions
-	// as the view object isn't instansiated at that stage.
-	// Would be better to hook in to viewDidLoad or similar but would require extra logic in
-	// code using this.
-
-	// This method is called more than once so guard against setting these values multiple times.
-	if (!self.dragGestureRecognizer) {
-		self.selectedPath = NSNotFound;
-		self.currentPath = NSNotFound;
-		self.dragGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressCallback:)];
-		[self.collectionView addGestureRecognizer:self.dragGestureRecognizer];
-	}
-}
-
-- (void)longPressCallback:(UILongPressGestureRecognizer *)longPressRecognizer
+- (void)gestureCallback:(UIGestureRecognizer *)gestureRecognizer
 {
 	CGPoint p = [self.dragGestureRecognizer locationInView:self.collectionView];
 
 	// Start dragging cell on long touch
-	if (longPressRecognizer.state == UIGestureRecognizerStateBegan) {
+	if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
 		[self startDraggingfromPoint:p];
     }
 	// Move cell that is being dragged to latest touch position
-    if (longPressRecognizer.state == UIGestureRecognizerStateChanged) {
+    if (gestureRecognizer.state == UIGestureRecognizerStateChanged) {
 		[self updateDragLocation:p];
     }
 	// Stop dragging
-	else if (longPressRecognizer.state == UIGestureRecognizerStateEnded || longPressRecognizer.state == UIGestureRecognizerStateCancelled) {
+	else if (gestureRecognizer.state == UIGestureRecognizerStateEnded || gestureRecognizer.state == UIGestureRecognizerStateCancelled) {
 		[self stopDragging:p];
 		[self invalidateLayout];
 	}
@@ -125,7 +108,7 @@
 	return path;
 }
 
-- (NSInteger)getClosestSlotPathForPoint:(CGPoint)p
+- (NSInteger)closestSlotPathForPoint:(CGPoint)p
 {
 	// Get the path for the slot - need to use original cell locations as these
 	// may have been updated by animators etc.
@@ -157,9 +140,8 @@
 	// Animator for attachment behavior
 	self.dragAnimator = [[UIDynamicAnimator alloc] initWithCollectionViewLayout:self];
 
-	// Get the cell we're going to drag and change it's appearance so user can see it is selected
+	// Get the cell we're going to drag
 	UICollectionViewLayoutAttributes *selectedCell = [self layoutAttributesForItemAtIndexPath:[self selectedIndexPath]];
-	[self prepareSelectedCellAppearanceForDrag:selectedCell animated:YES];
 
 	// Attath the cell we're dragging to the touch (drag) point
 	self.attachmentBehavior = [[UIAttachmentBehavior alloc] initWithItem:selectedCell attachedToAnchor:p];
@@ -167,6 +149,9 @@
 
 	// Animator for each cell that moves. Simplifies things elsewhere.
 	self.snapAnimators = [NSMutableDictionary dictionary];
+
+	// Change appearance of drag cell so user can see it is selected
+	[self prepareSelectedCellAppearanceForDrag:selectedCell animated:YES];
 }
 
 -(void)prepareSelectedCellAppearanceForDrag:(UICollectionViewLayoutAttributes *)selectedCell animated:(BOOL)animated
@@ -176,27 +161,7 @@
 	// Make it top
 	selectedCell.zIndex = 3;
 
-	// Increase size a little bit
-	// TODO: Make the size change relative to cell size
-	CGRect cellBounds = selectedCell.bounds;
-	cellBounds.size.width += 10;
-	cellBounds.size.height += 10;
-
-	__weak UICollectionViewCell *cellToChangeSize = [self.collectionView cellForItemAtIndexPath:[self selectedIndexPath]];
-
-	// Apply size change
-	if (animated) {
-		void (^animateChangeSize)() = ^()
-		{
-			cellToChangeSize.frame = cellBounds;
-			selectedCell.bounds = cellBounds;
-		};
-
-		[UIView transitionWithView:cellToChangeSize duration:0.05f options: UIViewAnimationOptionCurveLinear animations:animateChangeSize completion:nil];
-	} else {
-		cellToChangeSize.frame = cellBounds;
-		selectedCell.bounds = cellBounds;
-	}
+	[self.delegate flowLayout:self prepareItemForDrag:[self selectedIndexPath]];
 }
 
 - (void)updateDragLocation:(CGPoint)p
@@ -210,7 +175,7 @@
 	CGPoint testPoint = CGPointMake(CGRectGetMidX(cell.frame), CGRectGetMidY(cell.frame));
 
 	// Which slot are we hovering over
-	NSInteger toSlotIndex = [self getClosestSlotPathForPoint:testPoint];
+	NSInteger toSlotIndex = [self closestSlotPathForPoint:testPoint];
 	NSInteger fromSlotIndex = self.currentPath;
 
 	// Nothing to do if we're not over a slot
@@ -337,7 +302,7 @@
 
 - (void)stopDragging:(CGPoint)p
 {
-	// Stop dragging so tell the owner so it can update it's model to match
+	// Stopped dragging so tell the owner so it can update it's model to match
 	[self.delegate flowLayout:self updatedCellSlotContents:self.currentSlotContents];
 	[self.collectionView reloadData];
 
@@ -351,6 +316,9 @@
 	self.currentPath = NSNotFound;
 	self.originalCellLocations = nil;
 	self.currentSlotContents = nil;
+
+	UICollectionViewLayoutAttributes *selectedCell = [self layoutAttributesForItemAtIndexPath:[self selectedIndexPath]];
+	selectedCell.zIndex = 0;
 }
 
 - (NSArray *)layoutAttributesForElementsInRect:(CGRect)rect
@@ -378,6 +346,24 @@
 		[allAttributes addObjectsFromArray:[snapAnimator itemsInRect:rect]];
 	}
 	return allAttributes;
+}
+
+- (UICollectionViewLayoutAttributes *)layoutAttributesForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+	UICollectionViewLayoutAttributes *attributes = [self.dragAnimator layoutAttributesForCellAtIndexPath:indexPath];
+	if (attributes) {
+		return attributes;
+	}
+
+	NSArray *snapAnimators = [self.snapAnimators allValues];
+	for (UIDynamicAnimator *snapAnimator in snapAnimators) {
+		attributes = [snapAnimator layoutAttributesForCellAtIndexPath:indexPath];
+		if (attributes) {
+			return attributes;
+		}
+	}
+
+	return [super layoutAttributesForItemAtIndexPath:indexPath];
 }
 
 @end

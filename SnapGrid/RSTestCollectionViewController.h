@@ -13,7 +13,7 @@
 #import <UIKit/UIKit.h>
 #import "RSDraggableFlowLayout.h"
 
-@interface RSTestCollectionViewController : UICollectionViewController <UIDraggableFlowLayoutProtocol, UICollectionViewDelegate>
+@interface RSTestCollectionViewController : UICollectionViewController <UIDraggableFlowLayoutDelegate, UICollectionViewDelegate>
 @property (nonatomic, assign) int numberOfCells;
 @property (nonatomic, assign) float widthOfCells;
 @property (nonatomic, assign) float heightOfCells;

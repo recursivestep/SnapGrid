@@ -15,7 +15,7 @@
 
 
 #import "RSTestCollectionViewController.h"
-
+#import "RSExampleCollectionViewCell.h"
 
 
 // Private properties - they form a simple model for the order, colour and text of each cell.
@@ -52,13 +52,15 @@
     // Do any additional setup after loading the view.
 
 	// Set up collection view
-	[self.collectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"cellIdentifier"];
 	self.collectionView.backgroundColor = [UIColor whiteColor];
 	self.edgesForExtendedLayout = UIRectEdgeAll;
 	self.automaticallyAdjustsScrollViewInsets = YES;
 
+
 	// Set layout delegate
 	RSDraggableFlowLayout *layout = (RSDraggableFlowLayout *)self.collectionViewLayout;
+	layout.dragGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:layout action:@selector(gestureCallback:)];
+	[self.collectionView addGestureRecognizer:layout.dragGestureRecognizer];
 	layout.delegate = self;
 
 	// Cell model
@@ -76,9 +78,9 @@
 	}
 }
 
-// Currently only supports single section
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
+	// Currently only supports a single section
 	return self.numberOfCells;
 }
 
@@ -92,27 +94,15 @@
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-	static NSString *identifier = @"cellIdentifier";
+	static NSString *identifier = @"ExampleCell";
 	
-	UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
+	RSExampleCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
 
-	// Cells can be reused so explicitly set all attribute of the one we've been given
-	// and don't assume that we need to create all subviews
 	int mappedRow = [[self.cellOrder objectAtIndex:indexPath.row] intValue];
-	if (!cell.contentView.subviews.count) {	// New cell object
-		UILabel *label = [[UILabel alloc] initWithFrame:cell.bounds];
-		label.text = [self.cellText objectAtIndex:mappedRow];
-		label.textColor = [UIColor whiteColor];
-		label.textAlignment = NSTextAlignmentCenter;
-		[cell.contentView addSubview:label];
-		cell.backgroundColor = [self.cellColors objectAtIndex:mappedRow];
-	} else {	// Previously used cell object
-		UILabel *label = cell.contentView.subviews.firstObject;
-		label.text = [self.cellText objectAtIndex:mappedRow];
-		label.textColor = [UIColor whiteColor];
-		label.textAlignment = NSTextAlignmentCenter;
-		cell.backgroundColor = [self.cellColors objectAtIndex:mappedRow];
-	}
+
+	cell.text = [self.cellText objectAtIndex:mappedRow];
+	cell.backgroundColor = [self.cellColors objectAtIndex:mappedRow];
+
 	return cell;
 }
 
@@ -135,9 +125,6 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
-	self.view = nil;
-	self.cellOrder = nil;
-	self.cellText = nil;
 }
 
 #pragma mark UIDraggableFlowLayoutProtocol
@@ -154,12 +141,21 @@
 	self.cellOrder = newOrder;
 }
 
-- (BOOL)flowLayout:(RSDraggableFlowLayout *)flowLayout canMoveItemAtIndex:(int)index
+- (BOOL)flowLayout:(RSDraggableFlowLayout *)flowLayout canMoveItemAtIndex:(NSInteger)index
 {
 	if (index == self.numberOfCells - 1) {
 		return NO;
 	}
 	return YES;
+}
+
+- (void)flowLayout:(RSDraggableFlowLayout *)flowLayout prepareItemForDrag:(NSIndexPath *)indexPath
+{
+	UICollectionViewLayoutAttributes *dragCellAttributes = [self.collectionViewLayout layoutAttributesForItemAtIndexPath:indexPath];
+	CGRect bounds = dragCellAttributes.bounds;
+	bounds.size.width *= 1.2;
+	bounds.size.height *= 1.2;
+	dragCellAttributes.bounds = bounds;
 }
 
 #pragma mark UICollectionViewDelegate

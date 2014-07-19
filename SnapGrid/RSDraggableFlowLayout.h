@@ -28,10 +28,11 @@
 //
 // Interface for updating owner model when cells have been moved
 //
-@protocol UIDraggableFlowLayoutProtocol
+@protocol UIDraggableFlowLayoutDelegate
 @required
 - (void)flowLayout:(RSDraggableFlowLayout *)flowLayout updatedCellSlotContents:(NSArray *)slotContents;
-- (BOOL)flowLayout:(RSDraggableFlowLayout *)flowLayout canMoveItemAtIndex:(int)index;
+- (BOOL)flowLayout:(RSDraggableFlowLayout *)flowLayout canMoveItemAtIndex:(NSInteger)index;
+- (void)flowLayout:(RSDraggableFlowLayout *)flowLayout prepareItemForDrag:(NSIndexPath *)indexPath;
 @end
 
 
@@ -39,7 +40,7 @@
 // DraggableFlowLayout contains logic for dragging / animating cells around the grid
 //
 @interface RSDraggableFlowLayout : UICollectionViewFlowLayout
-
-@property(nonatomic, assign) id<UIDraggableFlowLayoutProtocol> delegate;
-
+@property(nonatomic, strong) UIGestureRecognizer *dragGestureRecognizer;			// To detect drag action
+@property(nonatomic, assign) id<UIDraggableFlowLayoutDelegate> delegate;
+- (void)gestureCallback:(UIGestureRecognizer *)gestureRecognizer;
 @end
