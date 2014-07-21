@@ -12,25 +12,13 @@
 // Basic collection view controller to test RSDraggableFlowLayout
 //
 
-
-
 #import "RSTestCollectionViewController.h"
 #import "RSExampleCollectionViewCell.h"
-
-
-// Private properties - they form a simple model for the order, colour and text of each cell.
-@interface RSTestCollectionViewController ()
-@property(nonatomic, strong) NSMutableArray *cellOrder;
-@property(nonatomic, strong) NSMutableArray *cellColors;
-@property(nonatomic, strong) NSMutableArray *cellText;
-@end
-
-
-
+#import "RSCellModel.h"
 
 @implementation RSTestCollectionViewController
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+- (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
@@ -38,7 +26,7 @@
     return self;
 }
 
-- (id)initWithCoder:(NSCoder *)decoder
+- (instancetype)initWithCoder:(NSCoder *)decoder
 {
 	self = [super initWithCoder:decoder];
 	if (self) {
@@ -62,20 +50,6 @@
 	layout.dragGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:layout action:@selector(gestureCallback:)];
 	[self.collectionView addGestureRecognizer:layout.dragGestureRecognizer];
 	layout.delegate = self;
-
-	// Cell model
-	self.cellOrder = [NSMutableArray array];
-	for (int i = 0; i < self.numberOfCells; i++) {
-		[self.cellOrder addObject:[NSNumber numberWithInt:i]];
-	}
-
-	// Cell attributes
-	self.cellColors = [NSMutableArray arrayWithCapacity:self.numberOfCells];
-	self.cellText = [NSMutableArray arrayWithCapacity:self.numberOfCells];
-	for (int i = 0; i < self.numberOfCells; i++) {
-		[self.cellColors addObject:[self randomColor]];
-		[self.cellText addObject:[NSString stringWithFormat:@"%i", i]];
-	}
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
@@ -84,24 +58,16 @@
 	return self.numberOfCells;
 }
 
-- (UIColor *)randomColor
-{
-	int r = arc4random() % 255;
-	int g = arc4random() % 255;
-	int b = arc4random() % 255;
-	return [UIColor colorWithRed:r/255.0 green:g/255.0 blue:b/255.0 alpha:1];
-}
-
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
 	static NSString *identifier = @"ExampleCell";
 	
 	RSExampleCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
 
-	int mappedRow = [[self.cellOrder objectAtIndex:indexPath.row] intValue];
+	int mappedRow = [[self.model.cellOrder objectAtIndex:indexPath.row] intValue];
 
-	cell.text = [self.cellText objectAtIndex:mappedRow];
-	cell.backgroundColor = [self.cellColors objectAtIndex:mappedRow];
+	cell.text = [self.model.cellText objectAtIndex:mappedRow];
+	cell.backgroundColor = [self.model.cellColors objectAtIndex:mappedRow];
 
 	return cell;
 }
@@ -135,10 +101,10 @@
 	NSMutableArray *newOrder = [NSMutableArray array];
 	for (int i = 0; i < slotContents.count; i++) {
 		int indexOfOldSlot = [[slotContents objectAtIndex:i] intValue];
-		int newSlotIndex = [[self.cellOrder objectAtIndex:indexOfOldSlot] intValue];
+		int newSlotIndex = [[self.model.cellOrder objectAtIndex:indexOfOldSlot] intValue];
 		[newOrder addObject:[NSNumber numberWithInt:newSlotIndex]];
 	}
-	self.cellOrder = newOrder;
+	self.model.cellOrder = newOrder;
 }
 
 - (BOOL)flowLayout:(RSDraggableFlowLayout *)flowLayout canMoveItemAtIndex:(NSInteger)index

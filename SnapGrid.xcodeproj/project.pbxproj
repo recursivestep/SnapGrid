@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		97C4D26E197D36490069C24B /* RSCellModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 97C4D26D197D36490069C24B /* RSCellModel.m */; };
 		97D8BA321979692F00EDE224 /* RSExampleCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 97D8BA311979692F00EDE224 /* RSExampleCollectionViewCell.m */; };
 		B973953E19129477002FD174 /* RSSnapBehavior.m in Sources */ = {isa = PBXBuildFile; fileRef = B973953D19129477002FD174 /* RSSnapBehavior.m */; };
 		B9F8BA7418F557FE00F068AB /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9F8BA7318F557FE00F068AB /* Foundation.framework */; };
@@ -39,6 +40,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		97C4D26C197D36490069C24B /* RSCellModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RSCellModel.h; sourceTree = "<group>"; };
+		97C4D26D197D36490069C24B /* RSCellModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RSCellModel.m; sourceTree = "<group>"; };
 		97D8BA301979692F00EDE224 /* RSExampleCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RSExampleCollectionViewCell.h; sourceTree = "<group>"; };
 		97D8BA311979692F00EDE224 /* RSExampleCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RSExampleCollectionViewCell.m; sourceTree = "<group>"; };
 		B973953C19129477002FD174 /* RSSnapBehavior.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RSSnapBehavior.h; sourceTree = "<group>"; };
@@ -148,6 +151,8 @@
 				B9F8BAAC18F55C8400F068AB /* RSTestCollectionViewController.m */,
 				97D8BA301979692F00EDE224 /* RSExampleCollectionViewCell.h */,
 				97D8BA311979692F00EDE224 /* RSExampleCollectionViewCell.m */,
+				97C4D26C197D36490069C24B /* RSCellModel.h */,
+				97C4D26D197D36490069C24B /* RSCellModel.m */,
 				B9F8BA8E18F557FE00F068AB /* Images.xcassets */,
 				B9F8BA7A18F557FE00F068AB /* Supporting Files */,
 			);
@@ -288,6 +293,7 @@
 				B9F8BAAD18F55C8400F068AB /* RSTestCollectionViewController.m in Sources */,
 				B973953E19129477002FD174 /* RSSnapBehavior.m in Sources */,
 				B9F8BA8D18F557FE00F068AB /* RSViewController.m in Sources */,
+				97C4D26E197D36490069C24B /* RSCellModel.m in Sources */,
 				97D8BA321979692F00EDE224 /* RSExampleCollectionViewCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

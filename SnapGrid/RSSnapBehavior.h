@@ -15,7 +15,8 @@
 
 @interface RSSnapBehavior : UISnapBehavior
 
-- (instancetype)initWithItem:(id <UIDynamicItem>)item snapToPoint:(CGPoint)point;
+- (instancetype)initWithItem:(id <UIDynamicItem>)item snapToPoint:(CGPoint)point indexPath:(NSIndexPath *)indexPath;
 @property(nonatomic, assign) CGPoint snapPoint;
+@property(nonatomic, strong) NSIndexPath *indexPath;
 
 @end

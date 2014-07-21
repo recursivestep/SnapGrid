@@ -14,8 +14,7 @@
 @interface RSDraggableFlowLayout ()
 
 @property(nonatomic, strong) UIAttachmentBehavior *attachmentBehavior;				// Pins dragging cell to touch position
-@property(nonatomic, strong) UIDynamicAnimator *dragAnimator;						// Animator for attachment behavior
-@property(nonatomic, strong) NSMutableDictionary *snapAnimators;					// Animators for snapping cells
+@property(nonatomic, strong) UIDynamicAnimator *animator;							// Animator for attachment behavior
 @property(nonatomic, strong) NSMutableArray *originalCellLocations;					// We need to know these and can't rely on dynamic values once drags have started
 @property(nonatomic, strong) NSMutableArray *currentSlotContents;					// Need to know which cells are in which slots while drag is in progress
 @property(nonatomic, assign) NSInteger selectedPath;								// Path of cell that drag started on
@@ -36,7 +35,7 @@
 	return self;
 }
 
-- (id)initWithCoder:(NSCoder *)aDecoder
+- (instancetype)initWithCoder:(NSCoder *)aDecoder
 {
 	self = [super initWithCoder:aDecoder];
 	if (self) {
@@ -66,7 +65,6 @@
 	// Stop dragging
 	else if (gestureRecognizer.state == UIGestureRecognizerStateEnded || gestureRecognizer.state == UIGestureRecognizerStateCancelled) {
 		[self stopDragging:p];
-		[self invalidateLayout];
 	}
 }
 
@@ -137,18 +135,15 @@
 	// the path of the cell we're currently over
 	self.currentPath = self.selectedPath;
 
-	// Animator for attachment behavior
-	self.dragAnimator = [[UIDynamicAnimator alloc] initWithCollectionViewLayout:self];
+	// Animator for dynamics
+	self.animator = [[UIDynamicAnimator alloc] initWithCollectionViewLayout:self];
 
 	// Get the cell we're going to drag
 	UICollectionViewLayoutAttributes *selectedCell = [self layoutAttributesForItemAtIndexPath:[self selectedIndexPath]];
 
 	// Attath the cell we're dragging to the touch (drag) point
 	self.attachmentBehavior = [[UIAttachmentBehavior alloc] initWithItem:selectedCell attachedToAnchor:p];
-	[self.dragAnimator addBehavior:self.attachmentBehavior];
-
-	// Animator for each cell that moves. Simplifies things elsewhere.
-	self.snapAnimators = [NSMutableDictionary dictionary];
+	[self.animator addBehavior:self.attachmentBehavior];
 
 	// Change appearance of drag cell so user can see it is selected
 	[self prepareSelectedCellAppearanceForDrag:selectedCell animated:YES];
@@ -232,10 +227,8 @@
 		fromCell.center = fromPoint;
 	}
 
-	// Get animator
-	UIDynamicAnimator *snapAnimator = [self snapAnimatorForPath:pathOfCellInSlot];
-	// And update the point to which it is snapping
-	[self updateSnapPointForCell:fromCell animator:snapAnimator snapToPoint:snapPoint];
+	// Update the point to which it is snapping
+	[self updateSnapPointForCell:fromCell snapToPoint:snapPoint];
 }
 
 - (void)updateSlotContentsOfSlotsFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex
@@ -256,48 +249,28 @@
 	}
 }
 
-- (UIDynamicAnimator *)snapAnimatorForPath:(NSIndexPath *)path
-{
-	// Get an animator for cell at path from dictionary or create if it doesn't already
-	UIDynamicAnimator *snapAnimator = [self.snapAnimators objectForKey:path];
-	if (!snapAnimator) {
-		snapAnimator = [[UIDynamicAnimator alloc] initWithCollectionViewLayout:self];
-		[self.snapAnimators setObject:snapAnimator forKey:path];
-	}
-	return snapAnimator;
-}
-
-- (void)updateSnapPointForCell:(UICollectionViewLayoutAttributes *)cell animator:(UIDynamicAnimator *)snapAnimator snapToPoint:(CGPoint)point
+- (void)updateSnapPointForCell:(UICollectionViewLayoutAttributes *)cell snapToPoint:(CGPoint)point
 {
 	// Get snap behavior - should only be one per snap animator
-	RSSnapBehavior *snapBehavior = nil;
-	if (snapAnimator.behaviors.count) {
-		snapBehavior = [snapAnimator.behaviors objectAtIndex:0];
+	for (UIDynamicBehavior *candidateBehavior in self.animator.behaviors) {
+		if ([candidateBehavior isKindOfClass:[RSSnapBehavior class]]) {
+			RSSnapBehavior *customSnapBehavior = (RSSnapBehavior *)candidateBehavior;
+			if ([customSnapBehavior.indexPath isEqual:cell.indexPath]) {
+				[self.animator removeBehavior:customSnapBehavior];	// Can't update existing so remove
+				break;
+			}
+		}
 	}
-	
-	// If there is no snap behavior or it is not snapping to correct point already
-	if (!snapBehavior || !CGPointEqualToPoint(snapBehavior.snapPoint, point)) {
-		// Create snap behavior to correct point (not possible to update snap point of existing behavior so always create a new one)
-		RSSnapBehavior *snapBehavior = [[RSSnapBehavior alloc] initWithItem:cell snapToPoint:point];
-		[snapAnimator removeAllBehaviors];	// Again, can't update existing so remove any
-		[snapAnimator addBehavior:snapBehavior];	// Add new behavior
 
-		// Default snap behavior has rotation. Some people prefer that but it looks cleaner without
-		// TODO: allow user to pass in dynamic behavior to customise animation effects.
-		UIDynamicItemBehavior * dynamicItem = [[UIDynamicItemBehavior alloc] initWithItems:@[cell]];
-		dynamicItem.allowsRotation = NO;
-		[snapAnimator addBehavior:dynamicItem];
-	} // else if snap behavior already points at correct place there's nothing to do
-}
+	// Create snap behavior to correct point (not possible to update snap point of existing behavior so always create a new one)
+	RSSnapBehavior *newSnapBehavior = [[RSSnapBehavior alloc] initWithItem:cell snapToPoint:point indexPath:cell.indexPath];
+	[self.animator addBehavior:newSnapBehavior];	// Add new behavior
 
-- (void)removeSnapBehaviors
-{
-	// Remove all snap behaviors and animators (called when we stop dragging)
-	NSArray *snapAnimators = [self.snapAnimators allValues];
-	for (UIDynamicAnimator *snapAnimator in snapAnimators) {
-		[snapAnimator removeAllBehaviors];
-	}
-	[self.snapAnimators removeAllObjects];
+	// Default snap behavior has rotation. Some people prefer that but it looks cleaner without
+	// TODO: allow user to pass in dynamic behavior to customise animation effects.
+	UIDynamicItemBehavior *dynamicItem = [[UIDynamicItemBehavior alloc] initWithItems:@[cell]];
+	dynamicItem.allowsRotation = NO;
+	[self.animator addBehavior:dynamicItem];
 }
 
 - (void)stopDragging:(CGPoint)p
@@ -307,11 +280,9 @@
 	[self.collectionView reloadData];
 
 	// Clean up all the mechanisms we used to enable the drag / snapping
-	[self removeSnapBehaviors];
-	self.snapAnimators = nil;
-	[self.dragAnimator removeAllBehaviors];
+	[self.animator removeAllBehaviors];
+	self.animator = nil;
 	self.attachmentBehavior = nil;
-	self.dragAnimator = nil;
 	self.selectedPath = NSNotFound;
 	self.currentPath = NSNotFound;
 	self.originalCellLocations = nil;
@@ -332,35 +303,30 @@
 	NSArray *existingAttributes = [super layoutAttributesForElementsInRect:rect];
 
 	// Add items from existing attributes that aren't duplicated by items owned by animators
-	for (UICollectionViewLayoutAttributes *a in existingAttributes) {
-		NSArray *snapCells = [self.snapAnimators allKeys];
-		if ((![snapCells containsObject:a.indexPath]) && (![a.indexPath isEqual:[self selectedIndexPath]])) {
-			[allAttributes addObject:a];
+	[allAttributes addObjectsFromArray:[self.animator itemsInRect:rect]];
+	[allAttributes addObjectsFromArray:[self.animator itemsInRect:rect]];
+
+	// Get paths of animated attributes
+	NSMutableArray *existingPaths = [NSMutableArray array];
+	for (UICollectionViewLayoutAttributes *animatedAttribute in allAttributes) {
+		[existingPaths addObject:animatedAttribute.indexPath];
+	}
+
+	// then add from existing if they're not in animated
+	for (UICollectionViewLayoutAttributes *existingAttribute in existingAttributes) {
+		if (![existingPaths containsObject:existingAttribute.indexPath]) {
+			[allAttributes addObject:existingAttribute];
 		}
 	}
 
-	// If cells are being managed by animators then get the layout attributes from them instead
-	[allAttributes addObjectsFromArray:[self.dragAnimator itemsInRect:rect]];	// That is drag animator
-	NSArray *snapAnimators = [self.snapAnimators allValues];					// plus all the snap animators
-	for (UIDynamicAnimator *snapAnimator in snapAnimators) {
-		[allAttributes addObjectsFromArray:[snapAnimator itemsInRect:rect]];
-	}
 	return allAttributes;
 }
 
 - (UICollectionViewLayoutAttributes *)layoutAttributesForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-	UICollectionViewLayoutAttributes *attributes = [self.dragAnimator layoutAttributesForCellAtIndexPath:indexPath];
+	UICollectionViewLayoutAttributes *attributes = [self.animator layoutAttributesForCellAtIndexPath:indexPath];
 	if (attributes) {
 		return attributes;
-	}
-
-	NSArray *snapAnimators = [self.snapAnimators allValues];
-	for (UIDynamicAnimator *snapAnimator in snapAnimators) {
-		attributes = [snapAnimator layoutAttributesForCellAtIndexPath:indexPath];
-		if (attributes) {
-			return attributes;
-		}
 	}
 
 	return [super layoutAttributesForItemAtIndexPath:indexPath];

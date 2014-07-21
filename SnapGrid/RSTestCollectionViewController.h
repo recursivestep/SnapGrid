@@ -13,9 +13,12 @@
 #import <UIKit/UIKit.h>
 #import "RSDraggableFlowLayout.h"
 
+@class RSCellModel;
+
 @interface RSTestCollectionViewController : UICollectionViewController <UIDraggableFlowLayoutDelegate, UICollectionViewDelegate>
 @property (nonatomic, assign) int numberOfCells;
 @property (nonatomic, assign) float widthOfCells;
 @property (nonatomic, assign) float heightOfCells;
 @property (nonatomic, assign) float spacing;
+@property (nonatomic, strong) RSCellModel *model;
 @end

@@ -8,6 +8,7 @@
 
 #import "RSViewController.h"
 #import "RSTestCollectionViewController.h"
+#import "RSCellModel.h"
 
 @interface RSViewController ()
 @property(nonatomic, weak) IBOutlet UISlider *numberOfCells;
@@ -39,10 +40,14 @@
 		RSTestCollectionViewController *vc = [segue destinationViewController];
 
 		// Pass any objects to the view controller here, like...
+		RSCellModel *model = [[RSCellModel alloc] initWithCellCount:self.numberOfCells.value];
+		vc.model = model;
 		vc.numberOfCells = self.numberOfCells.value;
 		vc.widthOfCells = self.widthOfCells.value;
 		vc.heightOfCells = self.heightOfCells.value;
 		vc.spacing = self.spacing.value;
+
+	
 	}
 }
 @end
