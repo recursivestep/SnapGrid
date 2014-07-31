@@ -8,7 +8,7 @@
 
 #import "RSDraggableFlowLayout.h"
 #import "RSSnapBehavior.h"
-
+#import "RSDraggableFlowLayoutDelegate.h"
 
 // Private properties
 @interface RSDraggableFlowLayout ()

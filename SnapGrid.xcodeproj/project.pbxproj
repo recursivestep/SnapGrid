@@ -44,6 +44,7 @@
 		97C4D26D197D36490069C24B /* RSCellModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RSCellModel.m; sourceTree = "<group>"; };
 		97D8BA301979692F00EDE224 /* RSExampleCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RSExampleCollectionViewCell.h; sourceTree = "<group>"; };
 		97D8BA311979692F00EDE224 /* RSExampleCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RSExampleCollectionViewCell.m; sourceTree = "<group>"; };
+		97E98B5E198A98C700FCE1DD /* RSDraggableFlowLayoutDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RSDraggableFlowLayoutDelegate.h; sourceTree = "<group>"; };
 		B973953C19129477002FD174 /* RSSnapBehavior.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RSSnapBehavior.h; sourceTree = "<group>"; };
 		B973953D19129477002FD174 /* RSSnapBehavior.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RSSnapBehavior.m; sourceTree = "<group>"; };
 		B9F8BA7018F557FE00F068AB /* SnapGrid.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SnapGrid.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -103,6 +104,7 @@
 				B9F8BAAF18F5631A00F068AB /* RSDraggableFlowLayout.m */,
 				B973953C19129477002FD174 /* RSSnapBehavior.h */,
 				B973953D19129477002FD174 /* RSSnapBehavior.m */,
+				97E98B5E198A98C700FCE1DD /* RSDraggableFlowLayoutDelegate.h */,
 			);
 			name = DraggableFlowLayout;
 			sourceTree = "<group>";

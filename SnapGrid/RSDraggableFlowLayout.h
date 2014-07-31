@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "RSDraggableFlowLayoutDelegate.h"
 
 //
 // Extended flow layout class that allows user to drag cells around.
@@ -23,24 +24,11 @@
 //	- Would be nice to allow users of this class to pass in UIDynamicItemBehavior objects
 //		to customise the animation effects.
 
-@class RSDraggableFlowLayout;
-
-//
-// Interface for updating owner model when cells have been moved
-//
-@protocol UIDraggableFlowLayoutDelegate
-@required
-- (void)flowLayout:(RSDraggableFlowLayout *)flowLayout updatedCellSlotContents:(NSArray *)slotContents;
-- (BOOL)flowLayout:(RSDraggableFlowLayout *)flowLayout canMoveItemAtIndex:(NSInteger)index;
-- (void)flowLayout:(RSDraggableFlowLayout *)flowLayout prepareItemForDrag:(NSIndexPath *)indexPath;
-@end
-
-
 //
 // DraggableFlowLayout contains logic for dragging / animating cells around the grid
 //
 @interface RSDraggableFlowLayout : UICollectionViewFlowLayout
 @property(nonatomic, strong) UIGestureRecognizer *dragGestureRecognizer;			// To detect drag action
-@property(nonatomic, assign) id<UIDraggableFlowLayoutDelegate> delegate;
+@property(nonatomic, assign) id<RSDraggableFlowLayoutDelegate> delegate;
 - (void)gestureCallback:(UIGestureRecognizer *)gestureRecognizer;
 @end

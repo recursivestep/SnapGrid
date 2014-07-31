@@ -15,7 +15,7 @@
 
 @class RSCellModel;
 
-@interface RSTestCollectionViewController : UICollectionViewController <UIDraggableFlowLayoutDelegate, UICollectionViewDelegate>
+@interface RSTestCollectionViewController : UICollectionViewController <RSDraggableFlowLayoutDelegate, UICollectionViewDelegate>
 @property (nonatomic, assign) int numberOfCells;
 @property (nonatomic, assign) float widthOfCells;
 @property (nonatomic, assign) float heightOfCells;
